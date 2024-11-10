@@ -27,14 +27,16 @@ const ZLIB_DEFLATE = 8
 
 const ZLIB_MAX_WINDOW = 7
 
-// var (
-// 	// ErrChecksum is returned when reading ZLIB data that has an invalid checksum.
-// 	ErrChecksum = errors.New("zlib: invalid checksum")
-// 	// ErrDictionary is returned when reading ZLIB data that has an invalid dictionary.
-// 	ErrDictionary = errors.New("zlib: invalid dictionary")
-// 	// ErrHeader is returned when reading ZLIB data that has an invalid header.
-// 	ErrHeader = errors.New("zlib: invalid header")
-// )
+typealias IOError = @io.IOError
+
+/// ErrChecksum is returned when reading ZLIB data that has an invalid checksum.
+pub let err_checksum : IOError = IOError("zlib: invalid checksum")
+
+/// ErrDictionary is returned when reading ZLIB data that has an invalid dictionary.
+pub let err_dictionary : IOError = IOError("zlib: invalid dictionary")
+
+/// ErrHeader is returned when reading ZLIB data that has an invalid header.
+pub let err_header : IOError = IOError("zlib: invalid header")
 
 // type reader struct {
 // 	r            flate.Reader

@@ -1,5 +1,6 @@
 {
   "import": [
+    "gmlewis/flate",
     "gmlewis/io"
   ]
 }
