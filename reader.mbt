@@ -51,7 +51,7 @@ struct Reader {
 /// resetter resets a ReadCloser returned by [Reader::new] or [Reader::new_dict]
 /// to switch to a new underlying Reader. This permits reusing a ReadCloser
 /// instead of allocating a new one.
-pub trait resetter {
+pub(open) trait resetter {
   /// reset discards any buffered data and resets the resetter as if it was
   /// newly initialized with the given reader.
   reset(Self, @io.Reader, Slice[Byte]) -> IOError?
