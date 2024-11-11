@@ -5,8 +5,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-typealias Slice[T] = @io.Slice[T]
-
 typealias IOError = @io.IOError
 
 let err_header = @zlib.err_header
@@ -154,7 +152,7 @@ test "decompressor" {
     let compressed_bytes = tt.compressed.map(fn(b) { b.to_byte() })
       |> Bytes::from_array()
     guard let (_, None) = inp.write_bytes(compressed_bytes)
-    let dict = Slice::new(tt.dict.map(fn(b) { b.to_byte() }))
+    let dict = @io.Slice::new(tt.dict.map(fn(b) { b.to_byte() }))
     let (zr, err) = @zlib.Reader::new_dict(inp, dict)
     if err != None {
       if err != tt.err {
@@ -183,7 +181,7 @@ test "decompressor" {
     }
 
     // Check for sticky errors.
-    let (n, err) = zr.read(Slice::new([0]))
+    let (n, err) = zr.read(@io.Slice::new([0]))
     if n != 0 || err != Some(@io.eof) {
       let _ = zr.close()
       raise TestError("\{tt.desc}: read() = (\{n}, \{err}), want (0, io.EOF)")
