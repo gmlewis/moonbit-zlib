@@ -54,96 +54,104 @@ pub fn reset(self : Writer, w : @io.Writer) -> Unit {
 }
 
 // write_header writes the ZLIB header.
-fn  write_header(self: Writer) -> IOError? {
-	self.wrote_header = true
-	// ZLIB has a two-byte header (as documented in RFC 1950).
-	// The first four bits is the CINFO (compression info), which is 7 for the default deflate window size.
-	// The next four bits is the CM (compression method), which is 8 for deflate.
-	self.scratch[0] = 0x78
-	// The next two bits is the FLEVEL (compression level). The four values are:
-	// 0=fastest, 1=fast, 2=default, 3=best.
-	// The next bit, FDICT, is set if a dictionary is given.
-	// The final five FCHECK bits form a mod-31 checksum.
+fn write_header(self : Writer) -> IOError? {
+  self.wrote_header = true
+  // ZLIB has a two-byte header (as documented in RFC 1950).
+  // The first four bits is the CINFO (compression info), which is 7 for the default deflate window size.
+  // The next four bits is the CM (compression method), which is 8 for deflate.
+  self.scratch[0] = 0x78
+  // The next two bits is the FLEVEL (compression level). The four values are:
+  // 0=fastest, 1=fast, 2=default, 3=best.
+  // The next bit, FDICT, is set if a dictionary is given.
+  // The final five FCHECK bits form a mod-31 checksum.
   // This package only supports BestSpeed:
-		self.scratch[1] = 0
-	if self.dict.length() > 0 {
-		self.scratch[1] = self.scratch[1] | (b'\x01' << 5)
-	}
-	self.scratch[1] += (31U - (be_uint16(self.scratch[:2])%31)).to_byte()
-	let (_, err) = self.w.write(self.scratch[0:2])
+  self.scratch[1] = 0
+  if self.dict.length() > 0 {
+    self.scratch[1] = self.scratch[1] | (b'\x01' << 5)
+  }
+  self.scratch[1] += (31U - be_uint16(self.scratch[:2]) % 31).to_byte()
+  let (_, err) = self.w.write(self.scratch[0:2])
   if err != None {
-		return err
-	}
-	if self.dict.length() > 0 {
-		// The next four bytes are the Adler-32 checksum of the dictionary.
-		be_put_uint32(self.scratch[:], @adler32.checksum(self.dict))
-		let (_, err) = self.w.write(self.scratch[0:4])
+    return err
+  }
+  if self.dict.length() > 0 {
+    // The next four bytes are the Adler-32 checksum of the dictionary.
+    be_put_uint32(self.scratch, @adler32.checksum(self.dict))
+    let (_, err) = self.w.write(self.scratch[0:4])
     if err != None {
-			return err
-		}
-	}
-	if self.compressor == nil {
-		// Initialize deflater unless the Writer is being reused
-		// after a reset call.
-		self.compressor, err = flate.NewWriterDict(self.w, self.level, self.dict)
-		if err != nil {
-			return err
-		}
-		self.digest = adler32.New()
-	}
-	return nil
+      return err
+    }
+  }
+  // if self.compressor == nil {
+  // 	// Initialize deflater unless the Writer is being reused
+  // 	// after a reset call.
+  // 	self.compressor, err = flate.NewWriterDict(self.w, self.level, self.dict)
+  // 	if err != nil {
+  // 		return err
+  // 	}
+  // 	self.digest = adler32.New()
+  // }
+  None
 }
 
-// // Write writes a compressed form of p to the underlying io.Writer. The
-// // compressed bytes are not necessarily flushed until the Writer is closed or
-// // explicitly flushed.
-// func (z *Writer) Write(p Slice[Byte]) (n int, err error) {
-// 	if !self.wrote_header {
-// 		self.err = self.write_header()
-// 	}
-// 	if self.err != nil {
-// 		return 0, self.err
-// 	}
-// 	if len(p) == 0 {
-// 		return 0, nil
-// 	}
-// 	n, err = self.compressor.Write(p)
-// 	if err != nil {
-// 		self.err = err
-// 		return
-// 	}
-// 	self.digest.Write(p)
-// 	return
-// }
+fn be_put_uint32(b : Slice[Byte], value : UInt) -> Unit {
+  b[3] = (value & 0xff).to_byte()
+  b[2] = ((value >> 8) & 0xff).to_byte()
+  b[1] = ((value >> 16) & 0xff).to_byte()
+  b[0] = ((value >> 24) & 0xff).to_byte()
+}
 
-// // Flush flushes the Writer to its underlying io.Writer.
-// func (z *Writer) Flush() error {
-// 	if !self.wrote_header {
-// 		self.err = self.write_header()
-// 	}
-// 	if self.err != nil {
-// 		return self.err
-// 	}
-// 	self.err = self.compressor.Flush()
-// 	return self.err
-// }
+// write writes a compressed form of p to the underlying io.Writer. The
+// compressed bytes are not necessarily flushed until the Writer is closed or
+// explicitly flushed.
+pub fn write(self : Writer, p : Slice[Byte]) -> (Int, IOError?) {
+  if not(self.wrote_header) {
+    self.err = self.write_header()
+  }
+  if self.err != None {
+    return (0, self.err)
+  }
+  if p.length() == 0 {
+    return (0, None)
+  }
+  let (n, err) = self.compressor.write(p)
+  if err != None {
+    self.err = err
+    return (n, self.err)
+  }
+  let _ = self.digest.write(p)
+  return (n, self.err)
+}
 
-// // Close closes the Writer, flushing any unwritten data to the underlying
-// // io.Writer, but does not close the underlying io.Writer.
-// func (z *Writer) Close() error {
-// 	if !self.wrote_header {
-// 		self.err = self.write_header()
-// 	}
-// 	if self.err != nil {
-// 		return self.err
-// 	}
-// 	self.err = self.compressor.Close()
-// 	if self.err != nil {
-// 		return self.err
-// 	}
-// 	checksum := self.digest.Sum32()
-// 	// ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
-// 	binary.BigEndian.PutUint32(self.scratch[:], checksum)
-// 	_, self.err = self.w.Write(self.scratch[0:4])
-// 	return self.err
-// }
+// flush flushes the Writer to its underlying io.Writer.
+pub fn flush(self : Writer) -> IOError? {
+  if not(self.wrote_header) {
+    self.err = self.write_header()
+  }
+  // if self.err != None {
+  // 	return self.err
+  // }
+  // self.err = self.compressor.flush()
+  return self.err
+}
+
+// close closes the Writer, flushing any unwritten data to the underlying
+// io.Writer, but does not close the underlying io.Writer.
+pub fn close(self : Writer) -> IOError? {
+  if not(self.wrote_header) {
+    self.err = self.write_header()
+  }
+  if self.err != None {
+    return self.err
+  }
+  self.err = self.compressor.close()
+  if self.err != None {
+    return self.err
+  }
+  let checksum = self.digest.sum32()
+  // ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
+  be_put_uint32(self.scratch, checksum)
+  let (_, err) = self.w.write(self.scratch)
+  self.err = err
+  self.err
+}
