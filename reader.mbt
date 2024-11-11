@@ -14,159 +14,186 @@
 ///
 /// 	var b bytes.Buffer
 /// 	w := zlib.NewWriter(&b)
-/// 	w.Write([]byte("hello, world\n"))
-/// 	w.Close()
+/// 	w.Write(Slice[Byte]("hello, world\n"))
+/// 	w.close()
 ///
 /// and to read that data back:
 ///
-/// 	r, err := zlib.NewReader(&b)
+/// 	r, err := zlib.Reader::new(&b)
 /// 	io.Copy(os.Stdout, r)
-/// 	r.Close()
+/// 	r.close()
 
-const ZLIB_DEFLATE = 8
+const ZLIB_DEFLATE = b'\x08'
 
-const ZLIB_MAX_WINDOW = 7
+const ZLIB_MAX_WINDOW = b'\x07'
+
+typealias Slice[T] = @io.Slice[T]
 
 typealias IOError = @io.IOError
 
-/// ErrChecksum is returned when reading ZLIB data that has an invalid checksum.
+/// err_checksum is returned when reading ZLIB data that has an invalid checksum.
 pub let err_checksum : IOError = IOError("zlib: invalid checksum")
 
-/// ErrDictionary is returned when reading ZLIB data that has an invalid dictionary.
+/// err_dictionary is returned when reading ZLIB data that has an invalid dictionary.
 pub let err_dictionary : IOError = IOError("zlib: invalid dictionary")
 
-/// ErrHeader is returned when reading ZLIB data that has an invalid header.
+/// err_header is returned when reading ZLIB data that has an invalid header.
 pub let err_header : IOError = IOError("zlib: invalid header")
 
-// type reader struct {
-// 	r            flate.Reader
-// 	decompressor io.ReadCloser
-// 	digest       hash.Hash32
-// 	err          error
-// 	scratch      [4]byte
-// }
+struct Reader {
+  mut r : @flate.Reader
+  mut decompressor : @io.ReadCloser
+  mut digest : @hash.Hash32
+  mut err : IOError?
+  mut scratch : Slice[Byte] // [4]byte
+}
 
-// // Resetter resets a ReadCloser returned by [NewReader] or [NewReaderDict]
-// // to switch to a new underlying Reader. This permits reusing a ReadCloser
-// // instead of allocating a new one.
-// type Resetter interface {
-// 	// Reset discards any buffered data and resets the Resetter as if it was
-// 	// newly initialized with the given reader.
-// 	Reset(r io.Reader, dict []byte) error
-// }
+/// resetter resets a ReadCloser returned by [Reader::new] or [Reader::new_dict]
+/// to switch to a new underlying Reader. This permits reusing a ReadCloser
+/// instead of allocating a new one.
+pub trait resetter {
+  /// reset discards any buffered data and resets the resetter as if it was
+  /// newly initialized with the given reader.
+  reset(Self, @io.Reader, Slice[Byte]) -> IOError?
+}
 
-// // NewReader creates a new ReadCloser.
-// // Reads from the returned ReadCloser read and decompress data from r.
-// // If r does not implement [io.ByteReader], the decompressor may read more
-// // data than necessary from r.
-// // It is the caller's responsibility to call Close on the ReadCloser when done.
-// //
-// // The [io.ReadCloser] returned by NewReader also implements [Resetter].
-// func NewReader(r io.Reader) (io.ReadCloser, error) {
-// 	return NewReaderDict(r, nil)
-// }
+/// Reader::new creates a new ReadCloser.
+/// Reads from the returned ReadCloser read and decompress data from r.
+/// If r does not implement [io.ByteReader], the decompressor may read more
+/// data than necessary from r.
+/// It is the caller's responsibility to call close on the ReadCloser when done.
+///
+/// The [io.ReadCloser] returned by Reader::new also implements [resetter].
+pub fn Reader::new(r : @flate.Reader) -> (@io.ReadCloser, IOError?) {
+  Reader::new_dict(r, Slice::new([]))
+}
 
-// // NewReaderDict is like [NewReader] but uses a preset dictionary.
-// // NewReaderDict ignores the dictionary if the compressed data does not refer to it.
-// // If the compressed data refers to a different dictionary, NewReaderDict returns [ErrDictionary].
-// //
-// // The ReadCloser returned by NewReaderDict also implements [Resetter].
-// func NewReaderDict(r io.Reader, dict []byte) (io.ReadCloser, error) {
-// 	z := new(reader)
-// 	err := z.Reset(r, dict)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return z, nil
-// }
+/// Reader::new_dict is like [Reader::new] but uses a preset dictionary.
+/// Reader::new_dict ignores the dictionary if the compressed data does not refer to it.
+/// If the compressed data refers to a different dictionary, Reader::new_dict returns [err_dictionary].
+///
+/// The ReadCloser returned by Reader::new_dict also implements [resetter].
+pub fn Reader::new_dict(
+  r : @flate.Reader,
+  dict : Slice[Byte]
+) -> (@io.ReadCloser, IOError?) {
+  let z : Reader = {
+    r,
+    decompressor: @flate.Reader::new(r),
+    digest: @adler32.new(),
+    err: None,
+    scratch: Slice::new([0, 0, 0, 0]),
+  }
+  let err = z.reset(r, dict)
+  (z, err)
+}
 
-// func (z *reader) Read(p []byte) (int, error) {
-// 	if z.err != nil {
-// 		return 0, z.err
-// 	}
+pub fn read(self : Reader, p : Slice[Byte]) -> (Int, IOError?) {
+  if self.err != None {
+    return (0, self.err)
+  }
+  let (n, err) = self.decompressor.read(p)
+  self.err = err
+  guard let (_, None) = self.digest.write(p[0:n])
+  if self.err != Some(@io.eof) {
+    // In the normal case we return here.
+    return (n, self.err)
+  }
 
-// 	var n int
-// 	n, z.err = z.decompressor.Read(p)
-// 	z.digest.Write(p[0:n])
-// 	if z.err != io.EOF {
-// 		// In the normal case we return here.
-// 		return n, z.err
-// 	}
+  // Finished file; check checksum.
+  let (_, err) = @io.read_full(self.r, self.scratch)
+  if err != None {
+    let mut err = err
+    if err == Some(@io.eof) {
+      err = Some(@io.err_unexpected_eof)
+    }
+    self.err = err
+    return (n, self.err)
+  }
+  // ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
+  let checksum = be_uint32(self.scratch)
+  if checksum != self.digest.sum32() {
+    self.err = Some(err_checksum)
+    return (n, self.err)
+  }
+  (n, Some(@io.eof))
+}
 
-// 	// Finished file; check checksum.
-// 	if _, err := io.ReadFull(z.r, z.scratch[0:4]); err != nil {
-// 		if err == io.EOF {
-// 			err = io.ErrUnexpectedEOF
-// 		}
-// 		z.err = err
-// 		return n, z.err
-// 	}
-// 	// ZLIB (RFC 1950) is big-endian, unlike GZIP (RFC 1952).
-// 	checksum := binary.BigEndian.Uint32(z.scratch[:4])
-// 	if checksum != z.digest.Sum32() {
-// 		z.err = ErrChecksum
-// 		return n, z.err
-// 	}
-// 	return n, io.EOF
-// }
+fn be_uint16(b : Slice[Byte]) -> UInt {
+  (b[0].to_uint() << 8) | b[1].to_uint()
+}
 
-// // Calling Close does not close the wrapped [io.Reader] originally passed to [NewReader].
-// // In order for the ZLIB checksum to be verified, the reader must be
-// // fully consumed until the [io.EOF].
-// func (z *reader) Close() error {
-// 	if z.err != nil && z.err != io.EOF {
-// 		return z.err
-// 	}
-// 	z.err = z.decompressor.Close()
-// 	return z.err
-// }
+fn be_uint32(b : Slice[Byte]) -> UInt {
+  (b[0].to_uint() << 24) |
+  (b[1].to_uint() << 16) |
+  (b[2].to_uint() << 8) |
+  b[3].to_uint()
+}
 
-// func (z *reader) Reset(r io.Reader, dict []byte) error {
-// 	*z = reader{decompressor: z.decompressor}
-// 	if fr, ok := r.(flate.Reader); ok {
-// 		z.r = fr
-// 	} else {
-// 		z.r = bufio.NewReader(r)
-// 	}
+/// Calling close does not close the wrapped [io.Reader] originally passed to [Reader::new].
+/// In order for the ZLIB checksum to be verified, the reader must be
+/// fully consumed until the [io.eof].
+pub fn close(self : Reader) -> IOError? {
+  if self.err != None && self.err != Some(@io.eof) {
+    return self.err
+  }
+  self.err = self.decompressor.close()
+  self.err
+}
 
-// 	// Read the header (RFC 1950 section 2.2.).
-// 	_, z.err = io.ReadFull(z.r, z.scratch[0:2])
-// 	if z.err != nil {
-// 		if z.err == io.EOF {
-// 			z.err = io.ErrUnexpectedEOF
-// 		}
-// 		return z.err
-// 	}
-// 	h := binary.BigEndian.Uint16(z.scratch[:2])
-// 	if (z.scratch[0]&0x0f != zlibDeflate) || (z.scratch[0]>>4 > zlibMaxWindow) || (h%31 != 0) {
-// 		z.err = ErrHeader
-// 		return z.err
-// 	}
-// 	haveDict := z.scratch[1]&0x20 != 0
-// 	if haveDict {
-// 		_, z.err = io.ReadFull(z.r, z.scratch[0:4])
-// 		if z.err != nil {
-// 			if z.err == io.EOF {
-// 				z.err = io.ErrUnexpectedEOF
-// 			}
-// 			return z.err
-// 		}
-// 		checksum := binary.BigEndian.Uint32(z.scratch[:4])
-// 		if checksum != adler32.Checksum(dict) {
-// 			z.err = ErrDictionary
-// 			return z.err
-// 		}
-// 	}
+pub fn reset(self : Reader, r : @flate.Reader, dict : Slice[Byte]) -> IOError? {
+  self.r = r
+  self.digest = @adler32.new()
+  self.err = None
+  self.scratch = Slice::new([0, 0, 0, 0])
+  // if fr, ok := r.(flate.Reader); ok {
+  // 	self.r = fr
+  // } else {
+  // 	self.r = bufio.Reader::new(r)
+  // }
 
-// 	if z.decompressor == nil {
-// 		if haveDict {
-// 			z.decompressor = flate.NewReaderDict(z.r, dict)
-// 		} else {
-// 			z.decompressor = flate.NewReader(z.r)
-// 		}
-// 	} else {
-// 		z.decompressor.(flate.Resetter).Reset(z.r, dict)
-// 	}
-// 	z.digest = adler32.New()
-// 	return nil
-// }
+  // Read the header (RFC 1950 section 2.2.).
+  let (_, err) = @io.read_full(self.r, self.scratch[0:2])
+  self.err = err
+  if self.err != None {
+    if self.err == Some(@io.eof) {
+      self.err = Some(@io.err_unexpected_eof)
+    }
+    return self.err
+  }
+  let h = be_uint16(self.scratch[:2])
+  if (self.scratch[0] & 0x0f) != ZLIB_DEFLATE ||
+    (self.scratch[0] >> 4) > ZLIB_MAX_WINDOW ||
+    h % 31 != 0 {
+    self.err = Some(err_header)
+    return self.err
+  }
+  let have_dict = (self.scratch[1] & 0x20) != 0
+  if have_dict {
+    let (_, err) = @io.read_full(self.r, self.scratch)
+    self.err = err
+    if self.err != None {
+      if self.err == Some(@io.eof) {
+        self.err = Some(@io.err_unexpected_eof)
+      }
+      return self.err
+    }
+    let checksum = be_uint32(self.scratch)
+    if checksum != @adler32.checksum(dict) {
+      self.err = Some(err_dictionary)
+      return self.err
+    }
+  }
+
+  //
+  // if self.decompressor == None {
+  if have_dict {
+    self.decompressor = @flate.Reader::new_dict(self.r, dict)
+  } else {
+    self.decompressor = @flate.Reader::new(self.r)
+  }
+  // } else {
+  // 	self.decompressor.(flate.resetter).reset(self.r, dict)
+  // }
+  None
+}
