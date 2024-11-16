@@ -176,7 +176,7 @@ test "decompressor" {
     if s != tt.raw {
       let _ = zr.close()
       raise TestError(
-        "\{tt.desc}: got \{n}-byte \{s} want \{tt.raw.length()}-byte \{tt.raw}",
+        "\{tt.desc}: got \{n}-byte \{s.to_array()} want \{tt.raw.length()}-byte \{tt.raw.to_array()}",
       )
     }
 
