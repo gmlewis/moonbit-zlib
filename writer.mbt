@@ -7,6 +7,7 @@
 
 // A Writer takes data written to it and writes the compressed
 // form of that data to an underlying writer (see NewWriter).
+///|
 struct Writer {
   mut w : @io.Writer
   // level : Int // only support BestSpeed
@@ -23,11 +24,13 @@ struct Writer {
 //
 // It is the caller's responsibility to call Close on the Writer when done.
 // Writes may be buffered and not flushed until Close.
+///|
 pub fn Writer::new(w : @io.Writer) -> Writer {
   Writer::new_dict(w, Slice::new([]))
 }
 
 // Writer::new_dict is like Writer::new but specifies a dictionary to compress with.
+///|
 pub fn Writer::new_dict(w : @io.Writer, dict : Slice[Byte]) -> Writer {
   {
     w,
@@ -43,6 +46,7 @@ pub fn Writer::new_dict(w : @io.Writer, dict : Slice[Byte]) -> Writer {
 // reset clears the state of the Writer z such that it is equivalent to its
 // initial state from NewWriterLevel or NewWriterLevelDict, but instead writing
 // to w.
+///|
 pub fn reset(self : Writer, w : @io.Writer) -> Unit {
   self.w = w
   // self.level and self.dict left unchanged.
@@ -54,6 +58,7 @@ pub fn reset(self : Writer, w : @io.Writer) -> Unit {
 }
 
 // write_header writes the ZLIB header.
+///|
 fn write_header(self : Writer) -> IOError? {
   self.wrote_header = true
   // ZLIB has a two-byte header (as documented in RFC 1950).
@@ -94,6 +99,7 @@ fn write_header(self : Writer) -> IOError? {
   None
 }
 
+///|
 fn be_put_uint32(b : Slice[Byte], value : UInt) -> Unit {
   b[3] = (value & 0xff).to_byte()
   b[2] = ((value >> 8) & 0xff).to_byte()
@@ -104,6 +110,7 @@ fn be_put_uint32(b : Slice[Byte], value : UInt) -> Unit {
 // write writes a compressed form of p to the underlying io.Writer. The
 // compressed bytes are not necessarily flushed until the Writer is closed or
 // explicitly flushed.
+///|
 pub fn write(self : Writer, p : Slice[Byte]) -> (Int, IOError?) {
   if not(self.wrote_header) {
     self.err = self.write_header()
@@ -124,6 +131,7 @@ pub fn write(self : Writer, p : Slice[Byte]) -> (Int, IOError?) {
 }
 
 // flush flushes the Writer to its underlying io.Writer.
+///|
 pub fn flush(self : Writer) -> IOError? {
   if not(self.wrote_header) {
     self.err = self.write_header()
@@ -137,6 +145,7 @@ pub fn flush(self : Writer) -> IOError? {
 
 // close closes the Writer, flushing any unwritten data to the underlying
 // io.Writer, but does not close the underlying io.Writer.
+///|
 pub fn close(self : Writer) -> IOError? {
   if not(self.wrote_header) {
     self.err = self.write_header()

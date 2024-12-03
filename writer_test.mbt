@@ -5,6 +5,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+///|
 typealias Slice[T] = @io.Slice[T]
 
 // let filenames = []string{
@@ -13,6 +14,7 @@ typealias Slice[T] = @io.Slice[T]
 // 	"../testdata/pi.txt",
 // }
 
+///|
 let data = [b"test a reasonable sized string that can be compressed"]
 
 // // Tests that compressing and then decompressing the given file at the given compression level and dictionary
@@ -33,6 +35,7 @@ let data = [b"test a reasonable sized string that can be compressed"]
 // 	test_dict(t, fn, b0, level, d)
 // }
 
+///|
 fn dump(b : Slice[Byte]) -> String {
   b
   .to_bytes()
@@ -42,6 +45,7 @@ fn dump(b : Slice[Byte]) -> String {
   .replace_all(old=",", new="")
 }
 
+///|
 fn test_dict(name : String, b0 : Slice[Byte], d : Bytes) -> Unit!TestError {
   // Make dictionary, if given.
   let mut dict = Slice::new([])
