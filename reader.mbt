@@ -44,9 +44,9 @@ pub let err_header : IOError = IOError("zlib: invalid header")
 
 ///|
 struct Reader {
-  mut r : @flate.Reader
-  mut decompressor : @io.ReadCloser
-  mut digest : @hash.Hash32
+  mut r : &@flate.Reader
+  mut decompressor : &@io.ReadCloser
+  mut digest : &@hash.Hash32
   mut err : IOError?
   mut scratch : Slice[Byte] // [4]byte
 }
@@ -57,7 +57,7 @@ struct Reader {
 pub(open) trait resetter {
   /// reset discards any buffered data and resets the resetter as if it was
   /// newly initialized with the given reader.
-  reset(Self, @io.Reader, Slice[Byte]) -> IOError?
+  reset(Self, &@io.Reader, Slice[Byte]) -> IOError?
 }
 
 ///| Reader::new creates a new ReadCloser.
@@ -67,7 +67,7 @@ pub(open) trait resetter {
 /// It is the caller's responsibility to call close on the ReadCloser when done.
 ///
 /// The [io.ReadCloser] returned by Reader::new also implements [resetter].
-pub fn Reader::new(r : @flate.Reader) -> (@io.ReadCloser, IOError?) {
+pub fn Reader::new(r : &@flate.Reader) -> (&@io.ReadCloser, IOError?) {
   Reader::new_dict(r, Slice::new([]))
 }
 
@@ -77,12 +77,12 @@ pub fn Reader::new(r : @flate.Reader) -> (@io.ReadCloser, IOError?) {
 ///
 /// The ReadCloser returned by Reader::new_dict also implements [resetter].
 pub fn Reader::new_dict(
-  r : @flate.Reader,
+  r : &@flate.Reader,
   dict : Slice[Byte]
-) -> (@io.ReadCloser, IOError?) {
+) -> (&@io.ReadCloser, IOError?) {
   let z : Reader = {
     r,
-    decompressor: @flate.Reader::new(r),
+    decompressor: &@flate.Reader::new(r),
     digest: @adler32.new(),
     err: None,
     scratch: Slice::new([0, 0, 0, 0]),
@@ -148,7 +148,7 @@ pub fn close(self : Reader) -> IOError? {
 }
 
 ///|
-pub fn reset(self : Reader, r : @flate.Reader, dict : Slice[Byte]) -> IOError? {
+pub fn reset(self : Reader, r : &@flate.Reader, dict : Slice[Byte]) -> IOError? {
   self.r = r
   self.digest = @adler32.new()
   self.err = None
@@ -195,9 +195,9 @@ pub fn reset(self : Reader, r : @flate.Reader, dict : Slice[Byte]) -> IOError? {
   //
   // if self.decompressor == None {
   if have_dict {
-    self.decompressor = @flate.Reader::new_dict(self.r, dict)
+    self.decompressor = &@flate.Reader::new_dict(self.r, dict)
   } else {
-    self.decompressor = @flate.Reader::new(self.r)
+    self.decompressor = &@flate.Reader::new(self.r)
   }
   // } else {
   // 	self.decompressor.(flate.resetter).reset(self.r, dict)

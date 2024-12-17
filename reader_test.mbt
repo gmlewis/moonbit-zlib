@@ -9,15 +9,6 @@
 typealias IOError = @io.IOError
 
 ///|
-let err_header = @zlib.err_header
-
-///|
-let err_checksum = @zlib.err_checksum
-
-///|
-let err_dictionary = @zlib.err_dictionary
-
-///|
 struct ZlibTest {
   desc : String
   raw : Bytes

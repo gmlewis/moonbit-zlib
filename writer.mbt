@@ -9,11 +9,11 @@
 // form of that data to an underlying writer (see NewWriter).
 ///|
 struct Writer {
-  mut w : @io.Writer
+  mut w : &@io.Writer
   // level : Int // only support BestSpeed
   dict : Slice[Byte]
   mut compressor : @flate.Writer
-  digest : @hash.Hash32
+  digest : &@hash.Hash32
   mut err : IOError?
   mut scratch : Slice[Byte] // [4]byte
   mut wrote_header : Bool
@@ -25,13 +25,13 @@ struct Writer {
 // It is the caller's responsibility to call Close on the Writer when done.
 // Writes may be buffered and not flushed until Close.
 ///|
-pub fn Writer::new(w : @io.Writer) -> Writer {
+pub fn Writer::new(w : &@io.Writer) -> Writer {
   Writer::new_dict(w, Slice::new([]))
 }
 
 // Writer::new_dict is like Writer::new but specifies a dictionary to compress with.
 ///|
-pub fn Writer::new_dict(w : @io.Writer, dict : Slice[Byte]) -> Writer {
+pub fn Writer::new_dict(w : &@io.Writer, dict : Slice[Byte]) -> Writer {
   {
     w,
     dict,
@@ -47,7 +47,7 @@ pub fn Writer::new_dict(w : @io.Writer, dict : Slice[Byte]) -> Writer {
 // initial state from NewWriterLevel or NewWriterLevelDict, but instead writing
 // to w.
 ///|
-pub fn reset(self : Writer, w : @io.Writer) -> Unit {
+pub fn reset(self : Writer, w : &@io.Writer) -> Unit {
   self.w = w
   // self.level and self.dict left unchanged.
   self.compressor = @flate.Writer::new_dict(w, self.dict)
