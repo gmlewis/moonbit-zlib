@@ -47,7 +47,7 @@ pub fn Writer::new_dict(w : &@io.Writer, dict : Slice[Byte]) -> Writer {
 // initial state from NewWriterLevel or NewWriterLevelDict, but instead writing
 // to w.
 ///|
-pub fn reset(self : Writer, w : &@io.Writer) -> Unit {
+pub fn Writer::reset(self : Writer, w : &@io.Writer) -> Unit {
   self.w = w
   // self.level and self.dict left unchanged.
   self.compressor = @flate.Writer::new_dict(w, self.dict)
@@ -146,7 +146,7 @@ pub fn flush(self : Writer) -> IOError? {
 // close closes the Writer, flushing any unwritten data to the underlying
 // io.Writer, but does not close the underlying io.Writer.
 ///|
-pub fn close(self : Writer) -> IOError? {
+pub fn Writer::close(self : Writer) -> IOError? {
   if not(self.wrote_header) {
     self.err = self.write_header()
   }
