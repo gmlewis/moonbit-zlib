@@ -143,6 +143,7 @@ let zlib_tests : Array[ZlibTest] = [
 ///|
 type! TestError String derive(Show)
 
+///|
 test "decompressor" {
   let b = @io.Buffer::new()
   for tt in zlib_tests {

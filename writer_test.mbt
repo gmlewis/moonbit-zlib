@@ -86,6 +86,7 @@ fn test_dict(name : String, b0 : Slice[Byte], d : Bytes) -> Unit!TestError {
   }
 }
 
+///|
 test "writer" {
   for i, s in data {
     let b = Slice::new(s.to_array())
