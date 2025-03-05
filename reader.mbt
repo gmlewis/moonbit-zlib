@@ -51,13 +51,13 @@ struct Reader {
   mut scratch : Slice[Byte] // [4]byte
 }
 
-///| resetter resets a ReadCloser returned by [Reader::new] or [Reader::new_dict]
+///| Resetter resets a ReadCloser returned by [Reader::new] or [Reader::new_dict]
 /// to switch to a new underlying Reader. This permits reusing a ReadCloser
 /// instead of allocating a new one.
-pub(open) trait resetter {
-  /// reset discards any buffered data and resets the resetter as if it was
+pub(open) trait Resetter {
+  /// reset discards any buffered data and resets the Resetter as if it was
   /// newly initialized with the given reader.
-  reset(Self, &@io.Reader, Slice[Byte]) -> IOError?
+  reset(Self, &@flate.Reader, Slice[Byte]) -> IOError?
 }
 
 ///| Reader::new creates a new ReadCloser.
@@ -66,7 +66,7 @@ pub(open) trait resetter {
 /// data than necessary from r.
 /// It is the caller's responsibility to call close on the ReadCloser when done.
 ///
-/// The [io.ReadCloser] returned by Reader::new also implements [resetter].
+/// The [io.ReadCloser] returned by Reader::new also implements [Resetter].
 pub fn Reader::new(r : &@flate.Reader) -> (&@io.ReadCloser, IOError?) {
   Reader::new_dict(r, Slice::new([]))
 }
@@ -75,7 +75,7 @@ pub fn Reader::new(r : &@flate.Reader) -> (&@io.ReadCloser, IOError?) {
 /// Reader::new_dict ignores the dictionary if the compressed data does not refer to it.
 /// If the compressed data refers to a different dictionary, Reader::new_dict returns [err_dictionary].
 ///
-/// The ReadCloser returned by Reader::new_dict also implements [resetter].
+/// The ReadCloser returned by Reader::new_dict also implements [Resetter].
 pub fn Reader::new_dict(
   r : &@flate.Reader,
   dict : Slice[Byte]
@@ -92,13 +92,13 @@ pub fn Reader::new_dict(
 }
 
 ///|
-pub fn read(self : Reader, p : Slice[Byte]) -> (Int, IOError?) {
+pub impl @io.ReadCloser for Reader with read(self, p) {
   if self.err != None {
     return (0, self.err)
   }
   let (n, err) = self.decompressor.read(p)
   self.err = err
-  guard let (_, None) = self.digest.write(p[0:n])
+  guard self.digest.write(p[0:n]) is (_, None)
   if self.err != Some(@io.eof) {
     // In the normal case we return here.
     return (n, self.err)
@@ -139,7 +139,7 @@ fn be_uint32(b : Slice[Byte]) -> UInt {
 ///| Calling close does not close the wrapped [io.Reader] originally passed to [Reader::new].
 /// In order for the ZLIB checksum to be verified, the reader must be
 /// fully consumed until the [io.eof].
-pub fn close(self : Reader) -> IOError? {
+pub impl @io.ReadCloser for Reader with close(self) {
   if self.err != None && self.err != Some(@io.eof) {
     return self.err
   }
@@ -148,7 +148,7 @@ pub fn close(self : Reader) -> IOError? {
 }
 
 ///|
-pub fn reset(self : Reader, r : &@flate.Reader, dict : Slice[Byte]) -> IOError? {
+pub impl Resetter for Reader with reset(self, r, dict) {
   self.r = r
   self.digest = @adler32.new()
   self.err = None
@@ -200,7 +200,7 @@ pub fn reset(self : Reader, r : &@flate.Reader, dict : Slice[Byte]) -> IOError? 
     self.decompressor = &@flate.Reader::new(self.r)
   }
   // } else {
-  // 	self.decompressor.(flate.resetter).reset(self.r, dict)
+  // 	self.decompressor.(flate.Resetter).reset(self.r, dict)
   // }
   None
 }

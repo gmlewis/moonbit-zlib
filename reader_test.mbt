@@ -150,7 +150,7 @@ test "decompressor" {
     let inp = @io.Buffer::new()
     let compressed_bytes = tt.compressed.map(fn(b) { b.to_byte() })
       |> Bytes::from_array()
-    guard let (_, None) = inp.write_bytes(compressed_bytes)
+    guard inp.write_bytes(compressed_bytes) is (_, None)
     let dict = @io.Slice::new(tt.dict.map(fn(b) { b.to_byte() }))
     let (zr, err) = @zlib.Reader::new_dict(inp, dict)
     if err != None {

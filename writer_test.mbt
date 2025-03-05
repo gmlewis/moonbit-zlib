@@ -58,14 +58,14 @@ fn test_dict(name : String, b0 : Slice[Byte], d : Bytes) -> Unit!TestError {
   if err != None {
     raise TestError("\{name} (dict=\{dump(dict)}): \{err}")
   }
-  guard let None = zlibw.close()
+  guard zlibw.close() is None
 
   //
   let (zlibr, err) = @zlib.Reader::new_dict(pipew, dict)
   if err != None {
     raise TestError("\{name} (dict=\{dump(dict)}): \{err}")
   }
-  guard let None = zlibr.close()
+  guard zlibr.close() is None
 
   // Compare the decompressed data.
   let (b1, err1) = @io.read_all(zlibr)
