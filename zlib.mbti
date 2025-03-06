@@ -16,18 +16,19 @@ impl Reader {
   new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
   new_dict(&@flate.Reader, @io.Slice[Byte]) -> (&@io.ReadCloser, @io.IOError?)
 }
-impl @io.ReadCloser for Reader
+impl @io.Closer for Reader
+impl @io.Reader for Reader
 impl Resetter for Reader
 
 type Writer
 impl Writer {
-  close(Self) -> @io.IOError?
   flush(Self) -> @io.IOError?
   new(&@io.Writer) -> Self
   new_dict(&@io.Writer, @io.Slice[Byte]) -> Self
   reset(Self, &@io.Writer) -> Unit
-  write(Self, @io.Slice[Byte]) -> (Int, @io.IOError?)
 }
+impl @io.Closer for Writer
+impl @io.Writer for Writer
 
 // Type aliases
 
