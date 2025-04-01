@@ -1,7 +1,9 @@
-package gmlewis/zlib
+package "gmlewis/zlib"
 
-alias @gmlewis/flate as @flate
-alias @gmlewis/io as @io
+import(
+  "gmlewis/flate"
+  "gmlewis/io"
+)
 
 // Values
 let err_checksum : @io.IOError
