@@ -1,4 +1,5 @@
-///| This file is based on the Go implementation found here:
+///|
+/// This file is based on the Go implementation found here:
 /// https://cs.opensource.google/go/go/+/refs/tags/go1.23.3:src/compress/zlib/reader.go
 /// which has the copyright notice:
 /// Copyright 2009 The Go Authors. All rights reserved.
@@ -33,13 +34,16 @@ typealias Slice[T] = @io.Slice[T]
 ///|
 typealias IOError = @io.IOError
 
-///| err_checksum is returned when reading ZLIB data that has an invalid checksum.
+///|
+/// err_checksum is returned when reading ZLIB data that has an invalid checksum.
 pub let err_checksum : IOError = IOError("zlib: invalid checksum")
 
-///| err_dictionary is returned when reading ZLIB data that has an invalid dictionary.
+///|
+/// err_dictionary is returned when reading ZLIB data that has an invalid dictionary.
 pub let err_dictionary : IOError = IOError("zlib: invalid dictionary")
 
-///| err_header is returned when reading ZLIB data that has an invalid header.
+///|
+/// err_header is returned when reading ZLIB data that has an invalid header.
 pub let err_header : IOError = IOError("zlib: invalid header")
 
 ///|
@@ -51,7 +55,8 @@ struct Reader {
   mut scratch : Slice[Byte] // [4]byte
 }
 
-///| Resetter resets a ReadCloser returned by [Reader::new] or [Reader::new_dict]
+///|
+/// Resetter resets a ReadCloser returned by [Reader::new] or [Reader::new_dict]
 /// to switch to a new underlying Reader. This permits reusing a ReadCloser
 /// instead of allocating a new one.
 pub(open) trait Resetter {
@@ -60,7 +65,8 @@ pub(open) trait Resetter {
   reset(Self, &@flate.Reader, Slice[Byte]) -> IOError?
 }
 
-///| Reader::new creates a new ReadCloser.
+///|
+/// Reader::new creates a new ReadCloser.
 /// Reads from the returned ReadCloser read and decompress data from r.
 /// If r does not implement [io.ByteReader], the decompressor may read more
 /// data than necessary from r.
@@ -71,7 +77,8 @@ pub fn Reader::new(r : &@flate.Reader) -> (&@io.ReadCloser, IOError?) {
   Reader::new_dict(r, Slice::new([]))
 }
 
-///| Reader::new_dict is like [Reader::new] but uses a preset dictionary.
+///|
+/// Reader::new_dict is like [Reader::new] but uses a preset dictionary.
 /// Reader::new_dict ignores the dictionary if the compressed data does not refer to it.
 /// If the compressed data refers to a different dictionary, Reader::new_dict returns [err_dictionary].
 ///
@@ -136,7 +143,8 @@ fn be_uint32(b : Slice[Byte]) -> UInt {
   b[3].to_uint()
 }
 
-///| Calling close does not close the wrapped [io.Reader] originally passed to [Reader::new].
+///|
+/// Calling close does not close the wrapped [io.Reader] originally passed to [Reader::new].
 /// In order for the ZLIB checksum to be verified, the reader must be
 /// fully consumed until the [io.eof].
 pub impl @io.Closer for Reader with close(self) {

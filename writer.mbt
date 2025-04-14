@@ -107,7 +107,8 @@ fn be_put_uint32(b : Slice[Byte], value : UInt) -> Unit {
   b[0] = ((value >> 24) & 0xff).to_byte()
 }
 
-///| write writes a compressed form of p to the underlying io.Writer. The
+///|
+/// write writes a compressed form of p to the underlying io.Writer. The
 /// compressed bytes are not necessarily flushed until the Writer is closed or
 /// explicitly flushed.
 pub impl @io.Writer for Writer with write(self, p) {
