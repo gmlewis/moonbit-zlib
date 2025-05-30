@@ -16,21 +16,17 @@ fn flush(Writer) -> @io.IOError?
 
 // Types and methods
 type Reader
-impl Reader {
-  new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
-  new_dict(&@flate.Reader, @io.Slice[Byte]) -> (&@io.ReadCloser, @io.IOError?)
-}
+fn Reader::new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
+fn Reader::new_dict(&@flate.Reader, @io.Slice[Byte]) -> (&@io.ReadCloser, @io.IOError?)
 impl @io.Closer for Reader
 impl @io.Reader for Reader
 impl Resetter for Reader
 
 type Writer
-impl Writer {
-  flush(Self) -> @io.IOError?
-  new(&@io.Writer) -> Self
-  new_dict(&@io.Writer, @io.Slice[Byte]) -> Self
-  reset(Self, &@io.Writer) -> Unit
-}
+fn Writer::flush(Self) -> @io.IOError?
+fn Writer::new(&@io.Writer) -> Self
+fn Writer::new_dict(&@io.Writer, @io.Slice[Byte]) -> Self
+fn Writer::reset(Self, &@io.Writer) -> Unit
 impl @io.Closer for Writer
 impl @io.Writer for Writer
 
