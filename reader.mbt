@@ -29,10 +29,10 @@ const ZLIB_DEFLATE = b'\x08'
 const ZLIB_MAX_WINDOW = b'\x07'
 
 ///|
-typealias Slice[T] = @io.Slice[T]
+typealias @io.Slice
 
 ///|
-typealias IOError = @io.IOError
+typealias @io.IOError
 
 ///|
 /// err_checksum is returned when reading ZLIB data that has an invalid checksum.

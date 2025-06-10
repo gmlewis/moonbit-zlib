@@ -6,7 +6,7 @@
 // license that can be found in the LICENSE file.
 
 ///|
-typealias Slice[T] = @io.Slice[T]
+typealias @io.Slice
 
 // let filenames = []string{
 // 	"../testdata/gettysburg.txt",
