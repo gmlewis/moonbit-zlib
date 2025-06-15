@@ -46,7 +46,11 @@ fn dump(b : Slice[Byte]) -> String {
 }
 
 ///|
-fn test_dict(name : String, b0 : Slice[Byte], d : Bytes) -> Unit!TestError {
+fn test_dict(
+  name : String,
+  b0 : Slice[Byte],
+  d : Bytes
+) -> Unit raise TestError {
   // Make dictionary, if given.
   let mut dict = Slice::new([])
   if d.length() > 0 {
@@ -91,6 +95,6 @@ test "writer" {
   for i, s in data {
     let b = Slice::new(s.to_array())
     let tag = "#\{i+1}"
-    test_dict!(tag, b, b"")
+    test_dict(tag, b, b"")
   }
 }
