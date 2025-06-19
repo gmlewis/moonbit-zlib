@@ -5,9 +5,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+///|
 // A Writer takes data written to it and writes the compressed
 // form of that data to an underlying writer (see NewWriter).
-///|
 struct Writer {
   mut w : &@io.Writer
   // level : Int // only support BestSpeed
@@ -19,18 +19,18 @@ struct Writer {
   mut wrote_header : Bool
 }
 
+///|
 // Writer::new creates a new Writer.
 // Writes to the returned Writer are compressed and written to w.
 //
 // It is the caller's responsibility to call Close on the Writer when done.
 // Writes may be buffered and not flushed until Close.
-///|
 pub fn Writer::new(w : &@io.Writer) -> Writer {
   Writer::new_dict(w, Slice::new([]))
 }
 
-// Writer::new_dict is like Writer::new but specifies a dictionary to compress with.
 ///|
+// Writer::new_dict is like Writer::new but specifies a dictionary to compress with.
 pub fn Writer::new_dict(w : &@io.Writer, dict : Slice[Byte]) -> Writer {
   {
     w,
@@ -43,10 +43,10 @@ pub fn Writer::new_dict(w : &@io.Writer, dict : Slice[Byte]) -> Writer {
   }
 }
 
+///|
 // reset clears the state of the Writer z such that it is equivalent to its
 // initial state from NewWriterLevel or NewWriterLevelDict, but instead writing
 // to w.
-///|
 pub fn Writer::reset(self : Writer, w : &@io.Writer) -> Unit {
   self.w = w
   // self.level and self.dict left unchanged.
@@ -57,8 +57,8 @@ pub fn Writer::reset(self : Writer, w : &@io.Writer) -> Unit {
   self.wrote_header = false
 }
 
-// write_header writes the ZLIB header.
 ///|
+// write_header writes the ZLIB header.
 fn write_header(self : Writer) -> IOError? {
   self.wrote_header = true
   // ZLIB has a two-byte header (as documented in RFC 1950).
@@ -130,8 +130,8 @@ pub impl @io.Writer for Writer with write(self, p) {
   return (n, self.err)
 }
 
-// flush flushes the Writer to its underlying io.Writer.
 ///|
+// flush flushes the Writer to its underlying io.Writer.
 pub fn flush(self : Writer) -> IOError? {
   if not(self.wrote_header) {
     self.err = self.write_header()
@@ -143,9 +143,9 @@ pub fn flush(self : Writer) -> IOError? {
   return self.err
 }
 
+///|
 // close closes the Writer, flushing any unwritten data to the underlying
 // io.Writer, but does not close the underlying io.Writer.
-///|
 pub impl @io.Closer for Writer with close(self) {
   if not(self.wrote_header) {
     self.err = self.write_header()

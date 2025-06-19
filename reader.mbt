@@ -178,7 +178,7 @@ pub impl Resetter for Reader with reset(self, r, dict) {
   }
   let h = be_uint16(self.scratch[:2])
   if (self.scratch[0] & 0x0f) != ZLIB_DEFLATE ||
-    (self.scratch[0] >> 4) > ZLIB_MAX_WINDOW ||
+    self.scratch[0] >> 4 > ZLIB_MAX_WINDOW ||
     h % 31 != 0 {
     self.err = Some(err_header)
     return self.err

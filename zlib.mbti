@@ -12,8 +12,6 @@ let err_dictionary : @io.IOError
 
 let err_header : @io.IOError
 
-fn flush(Writer) -> @io.IOError?
-
 // Types and methods
 type Reader
 fn Reader::new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
