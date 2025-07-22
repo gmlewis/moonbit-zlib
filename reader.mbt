@@ -85,7 +85,7 @@ pub fn Reader::new(r : &@flate.Reader) -> (&@io.ReadCloser, IOError?) {
 /// The ReadCloser returned by Reader::new_dict also implements [Resetter].
 pub fn Reader::new_dict(
   r : &@flate.Reader,
-  dict : Slice[Byte]
+  dict : Slice[Byte],
 ) -> (&@io.ReadCloser, IOError?) {
   let z : Reader = {
     r,

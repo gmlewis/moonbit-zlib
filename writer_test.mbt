@@ -49,7 +49,7 @@ fn dump(b : Slice[Byte]) -> String {
 fn test_dict(
   name : String,
   b0 : Slice[Byte],
-  d : Bytes
+  d : Bytes,
 ) -> Unit raise TestError {
   // Make dictionary, if given.
   let mut dict = Slice::new([])
