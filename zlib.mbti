@@ -13,6 +13,8 @@ let err_dictionary : @io.IOError
 
 let err_header : @io.IOError
 
+// Errors
+
 // Types and methods
 type Reader
 fn Reader::new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
