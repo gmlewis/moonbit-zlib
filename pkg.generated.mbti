@@ -1,0 +1,40 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "gmlewis/zlib"
+
+import(
+  "gmlewis/flate"
+  "gmlewis/io"
+)
+
+// Values
+let err_checksum : @io.IOError
+
+let err_dictionary : @io.IOError
+
+let err_header : @io.IOError
+
+// Errors
+
+// Types and methods
+type Reader
+fn Reader::new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
+fn Reader::new_dict(&@flate.Reader, @io.Slice[Byte]) -> (&@io.ReadCloser, @io.IOError?)
+impl @io.Closer for Reader
+impl @io.Reader for Reader
+impl Resetter for Reader
+
+type Writer
+fn Writer::flush(Self) -> @io.IOError?
+fn Writer::new(&@io.Writer) -> Self
+fn Writer::new_dict(&@io.Writer, @io.Slice[Byte]) -> Self
+fn Writer::reset(Self, &@io.Writer) -> Unit
+impl @io.Closer for Writer
+impl @io.Writer for Writer
+
+// Type aliases
+
+// Traits
+pub(open) trait Resetter {
+  reset(Self, &@flate.Reader, @io.Slice[Byte]) -> @io.IOError?
+}
+
