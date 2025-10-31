@@ -6,7 +6,7 @@
 // license that can be found in the LICENSE file.
 
 ///|
-typealias @io.IOError
+using @io {type IOError}
 
 ///|
 struct ZlibTest {

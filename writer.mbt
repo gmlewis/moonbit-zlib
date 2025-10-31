@@ -59,7 +59,7 @@ pub fn Writer::reset(self : Writer, w : &@io.Writer) -> Unit {
 
 ///|
 // write_header writes the ZLIB header.
-fn write_header(self : Writer) -> IOError? {
+fn Writer::write_header(self : Writer) -> IOError? {
   self.wrote_header = true
   // ZLIB has a two-byte header (as documented in RFC 1950).
   // The first four bits is the CINFO (compression info), which is 7 for the default deflate window size.
@@ -132,7 +132,7 @@ pub impl @io.Writer for Writer with write(self, p) {
 
 ///|
 // flush flushes the Writer to its underlying io.Writer.
-pub fn flush(self : Writer) -> IOError? {
+pub fn Writer::flush(self : Writer) -> IOError? {
   if not(self.wrote_header) {
     self.err = self.write_header()
   }

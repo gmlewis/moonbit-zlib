@@ -17,22 +17,17 @@ let err_header : @io.IOError
 
 // Types and methods
 type Reader
-fn Reader::close(Self) -> @io.IOError? // from trait `@io.Closer`
 fn Reader::new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
 fn Reader::new_dict(&@flate.Reader, @io.Slice[Byte]) -> (&@io.ReadCloser, @io.IOError?)
-fn Reader::read(Self, @io.Slice[Byte]) -> (Int, @io.IOError?) // from trait `@io.Reader`
-fn Reader::reset(Self, &@flate.Reader, @io.Slice[Byte]) -> @io.IOError? // from trait `Resetter`
 impl @io.Closer for Reader
 impl @io.Reader for Reader
 impl Resetter for Reader
 
 type Writer
-fn Writer::close(Self) -> @io.IOError? // from trait `@io.Closer`
 fn Writer::flush(Self) -> @io.IOError?
 fn Writer::new(&@io.Writer) -> Self
 fn Writer::new_dict(&@io.Writer, @io.Slice[Byte]) -> Self
 fn Writer::reset(Self, &@io.Writer) -> Unit
-fn Writer::write(Self, @io.Slice[Byte]) -> (Int, @io.IOError?) // from trait `@io.Writer`
 impl @io.Closer for Writer
 impl @io.Writer for Writer
 
