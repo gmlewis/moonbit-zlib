@@ -15,7 +15,9 @@ using @io {type Slice}
 // }
 
 ///|
-let data = [b"test a reasonable sized string that can be compressed"]
+let data : ReadOnlyArray[Bytes] = [
+  b"test a reasonable sized string that can be compressed",
+]
 
 // // Tests that compressing and then decompressing the given file at the given compression level and dictionary
 // // yields equivalent bytes to the original file.
