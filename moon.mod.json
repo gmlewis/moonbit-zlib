@@ -1,8 +1,8 @@
 {
   "name": "gmlewis/zlib",
-  "version": "0.20.25",
+  "version": "0.20.26",
   "deps": {
-    "gmlewis/flate": "0.35.24",
+    "gmlewis/flate": "0.35.25",
     "gmlewis/hash": "0.19.26",
     "gmlewis/io": "0.22.16"
   },
