@@ -7,29 +7,29 @@ import(
 )
 
 // Values
-let err_checksum : @io.IOError
+pub let err_checksum : @io.IOError
 
-let err_dictionary : @io.IOError
+pub let err_dictionary : @io.IOError
 
-let err_header : @io.IOError
+pub let err_header : @io.IOError
 
 // Errors
 
 // Types and methods
 type Reader
-fn Reader::new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
-fn Reader::new_dict(&@flate.Reader, @io.Slice[Byte]) -> (&@io.ReadCloser, @io.IOError?)
-impl @io.Closer for Reader
-impl @io.Reader for Reader
-impl Resetter for Reader
+pub fn Reader::new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
+pub fn Reader::new_dict(&@flate.Reader, @io.Slice[Byte]) -> (&@io.ReadCloser, @io.IOError?)
+pub impl @io.Closer for Reader
+pub impl @io.Reader for Reader
+pub impl Resetter for Reader
 
 type Writer
-fn Writer::flush(Self) -> @io.IOError?
-fn Writer::new(&@io.Writer) -> Self
-fn Writer::new_dict(&@io.Writer, @io.Slice[Byte]) -> Self
-fn Writer::reset(Self, &@io.Writer) -> Unit
-impl @io.Closer for Writer
-impl @io.Writer for Writer
+pub fn Writer::flush(Self) -> @io.IOError?
+pub fn Writer::new(&@io.Writer) -> Self
+pub fn Writer::new_dict(&@io.Writer, @io.Slice[Byte]) -> Self
+pub fn Writer::reset(Self, &@io.Writer) -> Unit
+pub impl @io.Closer for Writer
+pub impl @io.Writer for Writer
 
 // Type aliases
 
