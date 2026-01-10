@@ -141,7 +141,9 @@ let zlib_tests : Array[ZlibTest] = [
 ]
 
 ///|
-suberror TestError String derive(Show)
+suberror TestError {
+  TestError(String)
+} derive(Show)
 
 ///|
 test "decompressor" {
