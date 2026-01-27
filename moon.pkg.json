@@ -1,8 +1,0 @@
-{
-  "import": [
-    "gmlewis/flate",
-    "gmlewis/hash",
-    "gmlewis/hash/adler32",
-    "gmlewis/io"
-  ]
-}

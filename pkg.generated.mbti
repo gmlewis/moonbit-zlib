@@ -1,10 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "gmlewis/zlib"
 
-import(
-  "gmlewis/flate"
-  "gmlewis/io"
-)
+import {
+  "gmlewis/flate",
+  "gmlewis/io",
+}
 
 // Values
 pub let err_checksum : @io.IOError
