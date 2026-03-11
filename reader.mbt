@@ -156,6 +156,9 @@ pub impl @io.Closer for Reader with close(self) {
 }
 
 ///|
+pub impl @io.ReadCloser for Reader
+
+///|
 pub impl Resetter for Reader with reset(self, r, dict) {
   self.r = r
   self.digest = @adler32.new()

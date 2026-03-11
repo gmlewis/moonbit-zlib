@@ -20,6 +20,7 @@ type Reader
 pub fn Reader::new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
 pub fn Reader::new_dict(&@flate.Reader, @io.Slice[Byte]) -> (&@io.ReadCloser, @io.IOError?)
 pub impl @io.Closer for Reader
+pub impl @io.ReadCloser for Reader
 pub impl @io.Reader for Reader
 pub impl Resetter for Reader
 
