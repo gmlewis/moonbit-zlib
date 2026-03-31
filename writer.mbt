@@ -112,7 +112,7 @@ fn be_put_uint32(b : Slice[Byte], value : UInt) -> Unit {
 /// compressed bytes are not necessarily flushed until the Writer is closed or
 /// explicitly flushed.
 pub impl @io.Writer for Writer with write(self, p) {
-  if not(self.wrote_header) {
+  if !self.wrote_header {
     self.err = self.write_header()
   }
   if self.err != None {
@@ -133,7 +133,7 @@ pub impl @io.Writer for Writer with write(self, p) {
 ///|
 // flush flushes the Writer to its underlying io.Writer.
 pub fn Writer::flush(self : Writer) -> IOError? {
-  if not(self.wrote_header) {
+  if !self.wrote_header {
     self.err = self.write_header()
   }
   // if self.err != None {
@@ -147,7 +147,7 @@ pub fn Writer::flush(self : Writer) -> IOError? {
 // close closes the Writer, flushing any unwritten data to the underlying
 // io.Writer, but does not close the underlying io.Writer.
 pub impl @io.Closer for Writer with close(self) {
-  if not(self.wrote_header) {
+  if !self.wrote_header {
     self.err = self.write_header()
   }
   if self.err != None {
