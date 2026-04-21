@@ -143,7 +143,17 @@ let zlib_tests : Array[ZlibTest] = [
 ///|
 suberror TestError {
   TestError(String)
-} derive(Show)
+}
+
+///|
+pub impl Show for TestError with output(self, logger) {
+  let TestError(msg) = self
+  logger.write_string(
+    (
+      $|TestError("\{msg}")
+    ),
+  )
+}
 
 ///|
 test "decompressor" {
