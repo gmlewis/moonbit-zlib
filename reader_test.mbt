@@ -167,7 +167,9 @@ test "decompressor" {
     let (zr, err) = @zlib.Reader::new_dict(inp, dict)
     if err != None {
       if err != tt.err {
-        raise TestError("\{tt.desc}: @zlib.Reader::new_dict: \{err}")
+        raise TestError(
+          "\{tt.desc}: @zlib.Reader::new_dict: \{err.unwrap().to_repr()}",
+        )
       }
       continue
     }
@@ -179,7 +181,9 @@ test "decompressor" {
     if err != None {
       let _ = zr.close()
       if err != tt.err {
-        raise TestError("\{tt.desc}: io.copy: \{err} want \{tt.err}")
+        raise TestError(
+          "\{tt.desc}: io.copy: \{to_repr(err)} want \{to_repr(tt.err)}",
+        )
       }
       continue
     }
@@ -187,7 +191,7 @@ test "decompressor" {
     if s != tt.raw {
       let _ = zr.close()
       raise TestError(
-        "\{tt.desc}: got \{n}-byte \{s.to_array()} want \{tt.raw.length()}-byte \{tt.raw.to_array()}",
+        "\{tt.desc}: got \{n}-byte \{to_repr(s.to_array())} want \{tt.raw.length()}-byte \{to_repr(tt.raw.to_array())}",
       )
     }
 
@@ -195,11 +199,15 @@ test "decompressor" {
     let (n, err) = zr.read(@io.Slice::new([0]))
     if n != 0 || err != Some(@io.eof) {
       let _ = zr.close()
-      raise TestError("\{tt.desc}: read() = (\{n}, \{err}), want (0, io.EOF)")
+      raise TestError(
+        "\{tt.desc}: read() = (\{n}, \{to_repr(err)}), want (0, io.EOF)",
+      )
     }
     let err = zr.close()
     if err != None {
-      raise TestError("\{tt.desc}: close() = \{err}, want None")
+      raise TestError(
+        "\{tt.desc}: close() = \{err.unwrap().to_repr()}, want None",
+      )
     }
   }
 }

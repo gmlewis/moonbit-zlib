@@ -1,10 +1,10 @@
 {
   "name": "gmlewis/zlib",
-  "version": "0.21.6",
+  "version": "0.21.7",
   "deps": {
-    "gmlewis/flate": "0.36.6",
-    "gmlewis/hash": "0.20.6",
-    "gmlewis/io": "0.23.8"
+    "gmlewis/flate": "0.36.7",
+    "gmlewis/hash": "0.20.7",
+    "gmlewis/io": "0.23.10"
   },
   "readme": "README.md",
   "repository": "https://github.com/gmlewis/moonbit-zlib",

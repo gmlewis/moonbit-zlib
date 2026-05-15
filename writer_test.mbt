@@ -39,12 +39,8 @@ let data : ReadOnlyArray[Bytes] = [
 
 ///|
 fn dump(b : Slice[Byte]) -> String {
-  b
-  .to_bytes()
-  .to_array()
-  .map(fn(b) { b.to_int() })
-  .to_string()
-  .replace_all(old=",", new="")
+  let arr = b.to_bytes().to_array().map(fn(b) { b.to_int() })
+  to_repr(arr).to_string().replace_all(old=",", new="")
 }
 
 ///|
@@ -62,21 +58,21 @@ fn test_dict(
   let zlibw = @zlib.Writer::new_dict(pipew, dict)
   let (_, err) = zlibw.write(b0)
   if err != None {
-    raise TestError("\{name} (dict=\{dump(dict)}): \{err}")
+    raise TestError("\{name} (dict=\{dump(dict)}): \{err.unwrap().to_repr()}")
   }
   guard zlibw.close() is None
 
   //
   let (zlibr, err) = @zlib.Reader::new_dict(pipew, dict)
   if err != None {
-    raise TestError("\{name} (dict=\{dump(dict)}): \{err}")
+    raise TestError("\{name} (dict=\{dump(dict)}): \{err.unwrap().to_repr()}")
   }
   guard zlibr.close() is None
 
   // Compare the decompressed data.
   let (b1, err1) = @io.read_all(zlibr)
   if err1 != None {
-    raise TestError("\{name} (dict=\{dump(dict)}): \{err1}")
+    raise TestError("\{name} (dict=\{dump(dict)}): \{err1.unwrap().to_repr()}")
   }
   if b0.length() != b1.length() {
     raise TestError(
