@@ -36,6 +36,6 @@ pub impl @io.Writer for Writer
 
 // Traits
 pub(open) trait Resetter {
-  reset(Self, &@flate.Reader, @io.Slice[Byte]) -> @io.IOError?
+  fn reset(Self, &@flate.Reader, @io.Slice[Byte]) -> @io.IOError?
 }
 

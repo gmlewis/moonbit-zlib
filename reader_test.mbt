@@ -146,7 +146,7 @@ suberror TestError {
 }
 
 ///|
-pub impl Show for TestError with output(self, logger) {
+pub impl Show for TestError with fn output(self, logger) {
   let TestError(msg) = self
   logger.write_string(
     (
