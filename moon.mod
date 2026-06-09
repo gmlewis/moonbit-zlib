@@ -1,11 +1,11 @@
 name = "gmlewis/zlib"
 
-version = "0.21.8"
+version = "0.21.9"
 
 import {
-  "gmlewis/flate@0.36.8",
-  "gmlewis/hash@0.20.8",
-  "gmlewis/io@0.23.11",
+  "gmlewis/flate@0.36.9",
+  "gmlewis/hash@0.20.9",
+  "gmlewis/io@0.23.12",
 }
 
 readme = "README.md"
