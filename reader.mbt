@@ -103,7 +103,7 @@ pub impl @io.Reader for Reader with fn read(self, p) {
   if self.err != None {
     return (0, self.err)
   }
-  let (n, err) = self.decompressor.read(p)
+  let (n, err) = @io.Reader::read(self.decompressor, p)
   self.err = err
   guard self.digest.write(p[0:n]) is (_, None)
   if self.err != Some(@io.eof) {
@@ -151,7 +151,7 @@ pub impl @io.Closer for Reader with fn close(self) {
   if self.err != None && self.err != Some(@io.eof) {
     return self.err
   }
-  self.err = self.decompressor.close()
+  self.err = @io.Closer::close(self.decompressor)
   self.err
 }
 

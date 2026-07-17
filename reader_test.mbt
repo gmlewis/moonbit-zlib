@@ -179,7 +179,7 @@ test "decompressor" {
     b.reset()
     let (n, err) = @io.copy(b, zr)
     if err != None {
-      let _ = zr.close()
+      let _ = @io.Closer::close(zr)
       if err != tt.err {
         raise TestError(
           "\{tt.desc}: io.copy: \{to_repr(err)} want \{to_repr(tt.err)}",
@@ -189,21 +189,21 @@ test "decompressor" {
     }
     let s = b.to_bytes()
     if s != tt.raw {
-      let _ = zr.close()
+      let _ = @io.Closer::close(zr)
       raise TestError(
         "\{tt.desc}: got \{n}-byte \{to_repr(s.to_array())} want \{tt.raw.length()}-byte \{to_repr(tt.raw.to_array())}",
       )
     }
 
     // Check for sticky errors.
-    let (n, err) = zr.read(@io.Slice::new([0]))
+    let (n, err) = @io.Reader::read(zr, @io.Slice::new([0]))
     if n != 0 || err != Some(@io.eof) {
-      let _ = zr.close()
+      let _ = @io.Closer::close(zr)
       raise TestError(
         "\{tt.desc}: read() = (\{n}, \{to_repr(err)}), want (0, io.EOF)",
       )
     }
-    let err = zr.close()
+    let err = @io.Closer::close(zr)
     if err != None {
       raise TestError(
         "\{tt.desc}: close() = \{err.unwrap().to_repr()}, want None",

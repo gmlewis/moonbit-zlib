@@ -67,7 +67,7 @@ fn test_dict(
   if err != None {
     raise TestError("\{name} (dict=\{dump(dict)}): \{err.unwrap().to_repr()}")
   }
-  guard zlibr.close() is None
+  guard @io.Closer::close(zlibr) is None
 
   // Compare the decompressed data.
   let (b1, err1) = @io.read_all(zlibr)
