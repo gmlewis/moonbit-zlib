@@ -40,7 +40,7 @@ let data : ReadOnlyArray[Bytes] = [
 ///|
 fn dump(b : Slice[Byte]) -> String {
   let arr = b.to_bytes().to_array().map(fn(b) { b.to_int() })
-  to_repr(arr).to_string().replace_all(old=",", new="")
+  Repr(arr).to_string().replace_all(old=",", new="")
 }
 
 ///|
@@ -60,14 +60,14 @@ fn test_dict(
   if err != None {
     raise TestError("\{name} (dict=\{dump(dict)}): \{err.unwrap().to_repr()}")
   }
-  guard zlibw.close() is None
+  guard! zlibw.close() is None
 
   //
   let (zlibr, err) = @zlib.Reader::new_dict(pipew, dict)
   if err != None {
     raise TestError("\{name} (dict=\{dump(dict)}): \{err.unwrap().to_repr()}")
   }
-  guard @io.Closer::close(zlibr) is None
+  guard! @io.Closer::close(zlibr) is None
 
   // Compare the decompressed data.
   let (b1, err1) = @io.read_all(zlibr)

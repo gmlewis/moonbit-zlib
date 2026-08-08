@@ -105,7 +105,7 @@ pub impl @io.Reader for Reader with fn read(self, p) {
   }
   let (n, err) = @io.Reader::read(self.decompressor, p)
   self.err = err
-  guard self.digest.write(p[0:n]) is (_, None)
+  guard! self.digest.write(p[0:n]) is (_, None)
   if self.err != Some(@io.eof) {
     // In the normal case we return here.
     return (n, self.err)

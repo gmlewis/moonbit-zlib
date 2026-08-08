@@ -162,7 +162,7 @@ test "decompressor" {
     let inp = @io.Buffer::new()
     let compressed_bytes = tt.compressed.map(fn(b) { b.to_byte() })
       |> Bytes::from_array()
-    guard inp.write_bytes(compressed_bytes) is (_, None)
+    guard! inp.write_bytes(compressed_bytes) is (_, None)
     let dict = @io.Slice::new(tt.dict.map(fn(b) { b.to_byte() }))
     let (zr, err) = @zlib.Reader::new_dict(inp, dict)
     if err != None {
@@ -182,7 +182,7 @@ test "decompressor" {
       let _ = @io.Closer::close(zr)
       if err != tt.err {
         raise TestError(
-          "\{tt.desc}: io.copy: \{to_repr(err)} want \{to_repr(tt.err)}",
+          "\{tt.desc}: io.copy: \{Repr(err)} want \{Repr(tt.err)}",
         )
       }
       continue
@@ -191,7 +191,7 @@ test "decompressor" {
     if s != tt.raw {
       let _ = @io.Closer::close(zr)
       raise TestError(
-        "\{tt.desc}: got \{n}-byte \{to_repr(s.to_array())} want \{tt.raw.length()}-byte \{to_repr(tt.raw.to_array())}",
+        "\{tt.desc}: got \{n}-byte \{Repr(s.to_array())} want \{tt.raw.length()}-byte \{Repr(tt.raw.to_array())}",
       )
     }
 
@@ -200,7 +200,7 @@ test "decompressor" {
     if n != 0 || err != Some(@io.eof) {
       let _ = @io.Closer::close(zr)
       raise TestError(
-        "\{tt.desc}: read() = (\{n}, \{to_repr(err)}), want (0, io.EOF)",
+        "\{tt.desc}: read() = (\{n}, \{Repr(err)}), want (0, io.EOF)",
       )
     }
     let err = @io.Closer::close(zr)
