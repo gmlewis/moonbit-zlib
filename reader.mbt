@@ -94,7 +94,7 @@ pub fn Reader::new_dict(
     err: None,
     scratch: Slice::new([0, 0, 0, 0]),
   }
-  let err = z.reset(r, dict)
+  let err = Resetter::reset(z, r, dict)
   (z, err)
 }
 
