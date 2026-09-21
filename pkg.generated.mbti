@@ -17,18 +17,23 @@ pub let err_header : @io.IOError
 
 // Types and methods
 type Reader
+pub fn Reader::close(Self) -> @io.IOError?
 pub fn Reader::new(&@flate.Reader) -> (&@io.ReadCloser, @io.IOError?)
 pub fn Reader::new_dict(&@flate.Reader, @io.Slice[Byte]) -> (&@io.ReadCloser, @io.IOError?)
+pub fn Reader::read(Self, @io.Slice[Byte]) -> (Int, @io.IOError?)
+pub fn Reader::reset(Self, &@flate.Reader, @io.Slice[Byte]) -> @io.IOError?
 pub impl @io.Closer for Reader
 pub impl @io.ReadCloser for Reader
 pub impl @io.Reader for Reader
 pub impl Resetter for Reader
 
 type Writer
+pub fn Writer::close(Self) -> @io.IOError?
 pub fn Writer::flush(Self) -> @io.IOError?
 pub fn Writer::new(&@io.Writer) -> Self
 pub fn Writer::new_dict(&@io.Writer, @io.Slice[Byte]) -> Self
 pub fn Writer::reset(Self, &@io.Writer) -> Unit
+pub fn Writer::write(Self, @io.Slice[Byte]) -> (Int, @io.IOError?)
 pub impl @io.Closer for Writer
 pub impl @io.Writer for Writer
 

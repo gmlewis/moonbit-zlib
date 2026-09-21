@@ -108,6 +108,9 @@ fn be_put_uint32(b : Slice[Byte], value : UInt) -> Unit {
 }
 
 ///|
+pub extend Writer with @io.Writer::{write}
+
+///|
 /// write writes a compressed form of p to the underlying io.Writer. The
 /// compressed bytes are not necessarily flushed until the Writer is closed or
 /// explicitly flushed.
@@ -142,6 +145,9 @@ pub fn Writer::flush(self : Writer) -> IOError? {
   // self.err = self.compressor.flush()
   return self.err
 }
+
+///|
+pub extend Writer with @io.Closer::{close}
 
 ///|
 // close closes the Writer, flushing any unwritten data to the underlying

@@ -99,6 +99,9 @@ pub fn Reader::new_dict(
 }
 
 ///|
+pub extend Reader with @io.Reader::{read}
+
+///|
 pub impl @io.Reader for Reader with fn read(self, p) {
   if self.err != None {
     return (0, self.err)
@@ -144,6 +147,9 @@ fn be_uint32(b : Slice[Byte]) -> UInt {
 }
 
 ///|
+pub extend Reader with @io.Closer::{close}
+
+///|
 /// Calling close does not close the wrapped [io.Reader] originally passed to [Reader::new].
 /// In order for the ZLIB checksum to be verified, the reader must be
 /// fully consumed until the [io.eof].
@@ -157,6 +163,9 @@ pub impl @io.Closer for Reader with fn close(self) {
 
 ///|
 pub impl @io.ReadCloser for Reader
+
+///|
+pub extend Reader with Resetter::{reset}
 
 ///|
 pub impl Resetter for Reader with fn reset(self, r, dict) {

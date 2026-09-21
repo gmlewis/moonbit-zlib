@@ -68,21 +68,21 @@ let zlib_tests : Array[ZlibTest] = [
     raw: b"",
     compressed: [0x88, 0x98, 0x03, 0x00, 0x00, 0x00, 0x00, 0x01],
     dict: [],
-    err: Some(err_header),
+    err: Some(@zlib.err_header),
   },
   {
     desc: "bad header (FCHECK)",
     raw: b"",
     compressed: [0x78, 0x9f, 0x03, 0x00, 0x00, 0x00, 0x00, 0x01],
     dict: [],
-    err: Some(err_header),
+    err: Some(@zlib.err_header),
   },
   {
     desc: "bad checksum",
     raw: b"",
     compressed: [0x78, 0x9c, 0x03, 0x00, 0x00, 0x00, 0x00, 0xff],
     dict: [],
-    err: Some(err_checksum),
+    err: Some(@zlib.err_checksum),
   },
   {
     desc: "not enough data",
@@ -120,7 +120,7 @@ let zlib_tests : Array[ZlibTest] = [
       0x2e, 0x00, 0x24, 0x12, 0x04, 0x74,
     ],
     dict: [0x48, 0x65, 0x6c, 0x6c],
-    err: Some(err_dictionary),
+    err: Some(@zlib.err_dictionary),
   },
   {
     desc: "truncated zlib stream amid raw-block",
