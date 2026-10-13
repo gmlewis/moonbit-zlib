@@ -134,12 +134,12 @@ pub impl @io.Reader for Reader with fn read(self, p) {
 }
 
 ///|
-fn be_uint16(b : Slice[Byte]) -> UInt {
+fn be_uint16(b : Slice[Byte]) -> UInt32 {
   (b[0].to_uint() << 8) | b[1].to_uint()
 }
 
 ///|
-fn be_uint32(b : Slice[Byte]) -> UInt {
+fn be_uint32(b : Slice[Byte]) -> UInt32 {
   (b[0].to_uint() << 24) |
   (b[1].to_uint() << 16) |
   (b[2].to_uint() << 8) |

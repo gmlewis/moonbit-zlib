@@ -100,7 +100,7 @@ fn Writer::write_header(self : Writer) -> IOError? {
 }
 
 ///|
-fn be_put_uint32(b : Slice[Byte], value : UInt) -> Unit {
+fn be_put_uint32(b : Slice[Byte], value : UInt32) -> Unit {
   b[3] = (value & 0xff).to_byte()
   b[2] = ((value >> 8) & 0xff).to_byte()
   b[1] = ((value >> 16) & 0xff).to_byte()

@@ -12,8 +12,8 @@ using @io {type IOError}
 struct ZlibTest {
   desc : String
   raw : Bytes
-  compressed : Array[Int]
-  dict : Array[Int]
+  compressed : Array[Int32]
+  dict : Array[Int32]
   err : IOError?
 }
 
