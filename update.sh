@@ -29,4 +29,4 @@ d=json.load(open(sys.argv[1])).get('deps',{})
 done
 
 moon fmt && moon info
-moon test -j 12 --target all
+moon test -j 12 --target all --deny-warn
