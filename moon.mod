@@ -1,9 +1,9 @@
 name = "gmlewis/zlib"
 
-version = "0.21.20"
+version = "0.21.21"
 
 import {
-  "gmlewis/flate@0.36.20",
+  "gmlewis/flate@0.37.0",
   "gmlewis/hash@0.21.4",
   "gmlewis/io@0.23.22",
 }
